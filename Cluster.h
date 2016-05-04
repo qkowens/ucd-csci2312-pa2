@@ -22,7 +22,7 @@ namespace Clustering {
 
         void __del();
         void __cpy(LNodePtr pts);
-      //  bool __in(const Point &p) const;
+        bool __in(const Point &p) const;
 
 
     public:

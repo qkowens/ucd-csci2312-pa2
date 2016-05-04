@@ -4,80 +4,79 @@
 // 2/3/2016
 
 #include"Point.h"
-#include <iostream>
+#include<iostream>
 #include<fstream>
 #include<string>
 #include<sstream>
+#include<cmath>
 
-using namespace Clustering;
-
-Point::Point()
+namespace Clustering
 {
-	//created for compiler necessity
-}
+	unsigned int Point::__idGen = 0;
 
-Point::Point(int newDim)
-{
-	__dim = newDim;
-	__values = new double[__dim];
-	for (int pos = 0; pos < __dim; pos++)
-		__values[pos] = 0.0;
-	__id = __idGen++;
-}
-
-Point::Point(int newDim, double *newVal)
-{
-	__dim = newDim;
-	__values = newVal;
-	__id = __idGen++;
-}
-
-Point::Point(const Point &bCloned)
-{
-	__dim = bCloned.__dim;
-	__values = new double[__dim];
-	for (int pos = 0; pos > __dim; pos++)
-		__values[pos] = bCloned.getValue(pos);
-	__id = bCloned.__id;
-}
-
-Point & Point::operator=(const Point &otherPoint)
-{
-	this->__dim = otherPoint.__dim;
-	for (int pos = 0; pos < __dim; pos++)
-		this->__values[pos] = otherPoint.__values[pos];
-	return *this;
-}
-
-Clustering::Point::~Point()
-{
-	delete[] __values;
-}
-
-int Clustering::Point::getId() const
-{
-	return __id;
-}
-
-int Clustering::Point::getDims() const
-{
-	return __dim;
-}
-
-void Clustering::Point::setValue(int dim, double newVal)
-{
-	__values[dim] = newVal;
-}
-
-double Clustering::Point::getValue(int dim) const
-{
-	return __values[dim];
-}
-
-double Clustering::Point::distanceTo(const Point & secPoint) const
-{
-	if (this->__dim == secPoint.__dim)
+	Point::Point(int newDim)
 	{
+		__dim = newDim;
+		__values = new double[__dim];
+		for (int pos = 0; pos < __dim; pos++)
+			__values[pos] = 0.0;
+		__id = __idGen++;
+	}
+
+	Point::Point(int newDim, double *newVal)
+	{
+		__dim = newDim;
+		__values = newVal;
+		__id = __idGen++;
+	}
+
+	Point::Point(const Point &bCloned)
+	{
+		__dim = bCloned.__dim;
+		__values = new double[__dim];
+		for (int pos = 0; pos < __dim; pos++)
+			__values[pos] = bCloned.getValue(pos);
+		__id = bCloned.__id;
+	}
+
+	Point & Point::operator=(const Point &otherPoint)
+	{
+		__dim = otherPoint.__dim;
+		__id = otherPoint.__id;
+		__values = new double[otherPoint.__dim];
+		for (int pos = 0; pos < __dim; pos++)
+			__values[pos] = otherPoint.__values[pos];
+		return *this;
+	}
+
+	Point::~Point()
+	{
+		delete[] __values;
+	}
+
+	int Point::getId() const
+	{
+		return __id;
+	}
+
+	int Point::getDims() const
+	{
+		return __dim;
+	}
+
+	void Point::setValue(int dim, double newVal)
+	{
+		__values[dim] = newVal;
+	}
+
+	double Point::getValue(int dim) const
+	{
+		return __values[dim];
+	}
+
+	double Point::distanceTo(const Point & secPoint) const
+	{
+
 		double sum = 0;
 		for (int pos = 0; pos < this->__dim; pos++)
 		{
@@ -85,176 +84,157 @@ double Clustering::Point::distanceTo(const Point & secPoint) const
 		}
 		return sqrt(sum);
 	}
-}
 
-Point & Clustering::Point::operator*=(double operand)
-{
-	for (int pos = 0; pos < this->__dim; pos++)
-		this->__values[pos] *= operand;
-	return *this;
-}
-
-Point & Clustering::Point::operator/=(double operand)
-{
-	for (int pos = 0; pos < this->__dim; pos++)
-		this->__values[pos] /= operand;
-	return *this;
-}
-
-const Point Clustering::Point::operator*(double operand) const
-{
-	return Point(*this) *= operand;
-}
-
-const Point Clustering::Point::operator/(double operand) const
-{
-	return Point(*this) /= operand;
-}
-
-double & Clustering::Point::operator[](int index)
-{
-	return __values[index];
-}
-
-Point & Clustering::operator+=(Point & change, const Point & addend)
-{
-	if (change.__dim == addend.__dim)
+	Point & Point::operator*=(double operand)
 	{
-		for (int pos = 0; pos < change.__dim; pos++)
+		for (int pos = 0; pos < this->__dim; pos++)
+			__values[pos] *= operand;
+		return *this;
+	}
+
+	Point & Point::operator/=(double operand)
+	{
+		for (int pos = 0; pos < this->__dim; pos++)
+			__values[pos] /= operand;
+		return *this;
+	}
+
+	const Point Point::operator*(double operand) const
+	{
+		return Point(*this) *= operand;
+	}
+
+	const Point Point::operator/(double operand) const
+	{
+		return Point(*this) /= operand;
+	}
+
+	double & Point::operator[](int index)
+	{
+		return __values[index];
+	}
+
+	Point &operator+=(Point & change, const Point & addend)
+	{
+		for (int pos = 0; pos < change.getDims(); pos++)
+			change.setValue(pos, change.getValue(pos) + addend.getValue(pos));
+		return change;
+	}
+
+	Point &operator-=(Point & change, const Point & addend)
+	{
+		for (int pos = 0; pos < change.getDims(); pos++)
+			change.setValue(pos, change.getValue(pos) - addend.getValue(pos));
+		return change;
+	}
+
+	const Point operator+(const Point & addOne, const Point & addTwo)
+	{
+		Point temp(addOne.getDims());
+		for (int pos = 0; pos < addOne.getDims(); pos++)
+			temp.setValue(pos, addOne.getValue(pos) + addTwo.getValue(pos));
+		return temp;
+	}
+
+	const Point operator-(const Point & addOne, const Point & addTwo)
+	{
+		Point temp(addOne.getDims());
+		for (int pos = 0; pos < addOne.getDims(); pos++)
+			temp.setValue(pos, addOne.getValue(pos) - addTwo.getValue(pos));
+		return temp;
+	}
+
+	bool operator==(const Point & equalOne, const Point & equalTwo)
+	{
+		if (equalOne.__id != equalTwo.__id)
+			return false;
+		if (equalOne.getDims() == equalTwo.getDims())
+			for (int pos = 0; pos < equalOne.getDims(); pos++)
+				if (equalOne.getValue(pos) != equalTwo.getValue(pos))
+					return false;
+		return true;
+	}
+
+	bool operator!=(const Point & equalOne, const Point & equalTwo)
+	{
+		return(!(equalOne == equalTwo));
+	}
+
+	bool operator<(const Point & compOne, const Point & compTwo)
+	{
+		for (int pos = 0; pos < compOne.getDims(); pos++)
 		{
-			change.__values[pos] += addend.__values[pos];
+			if (compOne.getValue(pos) < compTwo.getValue(pos))
+				return true;
+			if (compOne.getValue(pos) > compTwo.getValue(pos))
+				return false;
 		}
-		return change;
+		return false;
 	}
-	else
-	{
-		std::cout << std::endl << "The points do not have the same amount of dimensions." << std::endl;
-		return change;
-	}
-}
 
-Point & Clustering::operator-=(Point & change, const Point & addend)
-{
-	if (change.__dim == addend.__dim)
+	bool operator>(const Point & compOne, const Point & compTwo)
 	{
-		for (int pos = 0; pos < change.__dim; pos++)
+		for (int pos = 0; pos < compOne.getDims(); pos++)
 		{
-			change.__values[pos] -= addend.__values[pos];
+			if (compOne.getValue(pos) < compTwo.getValue(pos))
+				return false;
+			if (compOne.getValue(pos) > compTwo.getValue(pos))
+				return true;
 		}
-		return change;
+		return false;
 	}
-	else
+
+	bool operator<=(const Point & compOne, const Point & compTwo)
 	{
-		std::cout << std::endl << "The points do not have the same amount of dimensions." << std::endl;
-		return change;
+		for (int pos = 0; pos < compOne.getDims(); pos++)
+		{
+			if (compOne.getValue(pos) < compTwo.getValue(pos))
+				return true;
+			if (compOne.getValue(pos) > compTwo.getValue(pos))
+				return false;
+		}
+		return true;
 	}
-}
 
-const Point Clustering::operator+(const Point & addOne, const Point & addTwo)
-{
-	Point temp(addOne);
-	return temp += addTwo;
-}
-
-const Point Clustering::operator-(const Point & addOne, const Point & addTwo)
-{
-	Point temp(addOne);
-	return temp -= addTwo;
-}
-
-bool Clustering::operator==(const Point & equalOne, const Point & equalTwo)
-{
-	int pos = 0;
-	while (pos < equalOne.__dim)
+	bool operator>=(const Point & compOne, const Point & compTwo)
 	{
-		if (equalOne.__values[pos] != equalTwo.__values[pos])
-			return false;
-		pos++;
+		for (int pos = 0; pos < compOne.getDims(); pos++)
+		{
+			if (compOne.getValue(pos) < compTwo.getValue(pos))
+				return false;
+			if (compOne.getValue(pos) > compTwo.getValue(pos))
+				return true;
+		}
+		return true;
 	}
-	return true;
-}
 
-bool Clustering::operator!=(const Point & equalOne, const Point & equalTwo)
-{
-	int pos = 0;
-	while (pos < equalOne.__dim)
+	std::ostream & operator<<(std::ostream & out, const Point & outPoint)
 	{
-		if (equalOne.__values[pos] != equalTwo.__values[pos])
-			return true;
-		pos++;
+		int pos = 0;
+		for (; pos < outPoint.__dim - 1; pos++)
+		{
+			out << outPoint.getValue(pos) << ", ";
+		}
+		out << outPoint.__values[pos];
+		return out;
 	}
-	return false;
-}
 
-bool Clustering::operator<(const Point & compOne, const Point & compTwo)
-{
-	int pos = 0;
-	while (pos < compOne.__dim)
+	std::istream & operator>>(std::istream & in, Point & inPoint)
 	{
-		if (compOne.__values[pos] < compTwo.__values[pos])
-			return false;
-		pos++;
-	}
-	return true;
-}
+		std::string temp;
+		int i = 0;
+		while (getline(in, temp, ','))
+		{
+			double d;
 
-bool Clustering::operator>(const Point & compOne, const Point & compTwo)
-{
-	int pos = 0;
-	while (pos < compOne.__dim)
-	{
-		if (compOne.__values[pos] > compTwo.__values[pos])
-			return false;
-		pos++;
-	}
-	return true;
-}
+			d = std::stod(temp);
 
-bool Clustering::operator<=(const Point & compOne, const Point & compTwo)
-{
-	int pos = 0;
-	while (pos < compOne.__dim)
-	{
-		if (compOne.__values[pos] <= compTwo.__values[pos])
-			return false;
-		pos++;
-	}
-	return true;
-}
+			std::cout << "Value: " << d << std::endl;
 
-bool Clustering::operator>=(const Point & compOne, const Point & compTwo)
-{
-	int pos = 0;
-	while (pos < compOne.__dim)
-	{
-		if (compOne.__values[pos]>= compTwo.__values[pos])
-			return false;
-		pos++;
-	}
-	return true;
-}
+			inPoint.setValue(i++, d);
+		}
 
-std::ostream & Clustering::operator<<(std::ostream & out, const Point & outPoint)
-{
-	std::cout << std::endl;
-	unsigned int pos = 0;
-	for (pos < outPoint.__dim - 1; pos++;)
-		out << outPoint.__values[pos] << ", ";
-	out << outPoint.__values[pos] << std::endl;
-	out << outPoint.__values[pos];
-	return out;
-}
 
-std::istream & Clustering::operator>>(std::istream & in, Point & inPoint)
-{
-	std::string tempStr;
-	double tempDbl;
-	for (int pos = 0; pos < inPoint.__dim; pos++)
-	{
-		in >> tempStr;
-		std::stringstream tempSS(tempStr);
-		tempSS >> tempDbl;
-		inPoint.__values[pos] = tempDbl;
+		return in;
 	}
-	return in;
 }
